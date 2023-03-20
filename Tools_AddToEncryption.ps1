@@ -1,7 +1,7 @@
 # Employment Tool v3
 #	Tools - Add To Encryption
 
-$adList = Get-ADUser -SearchBase "CN=Users,DC=sevone,DC=com" -Filter *
+$adList = Get-ADUser -SearchBase "CN=Users,DC=domain,DC=com" -Filter *
 
 	# Get username
 

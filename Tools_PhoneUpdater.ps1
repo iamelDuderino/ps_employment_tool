@@ -1,7 +1,7 @@
 # Employment Tool v3
 #	Tools - Phone Updater
 
-$adList = Get-ADUser -Filter * -SearchBase "CN=Users,DC=sevone,DC=com"
+$adList = Get-ADUser -Filter * -SearchBase "CN=Users,DC=domain,DC=com"
 
 	# Prompt for username and return existing information
 

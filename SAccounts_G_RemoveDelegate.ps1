@@ -1,7 +1,7 @@
 # Employment Tool v3.0
 # 	Service Accounts - Google - Remove Delegate
 
-$googleSVCList = (Get-ADUser -Filter * -SearchBase "OU=Google SVC Accounts,DC=sevone,DC=com").SamAccountName
+$googleSVCList = (Get-ADUser -Filter * -SearchBase "OU=Google SVC Accounts,DC=domain,DC=com").SamAccountName
 
 Function RemoveDelegateForm {
 
@@ -33,7 +33,7 @@ If ($textbox_Username.Text -eq "") {
 	$script:svcCheck = $False
 	Check-Fill
 	} Else {
-	$username = ($textbox_Username.Text).Replace("@sevone.com","")
+	$username = ($textbox_Username.Text).Replace("@domain.com","")
 	$check = $googleSVCList |Select-String "^$username\b$" -Quiet
 	If ($check -eq $True) {
 		$textbox_Username.Enabled = $False
@@ -41,7 +41,7 @@ If ($textbox_Username.Text -eq "") {
 		$script:svcCheck = $True
 		Check-Fill
 		$theirEmails = GAM user $username show delegates |Select-String " Delegate Email: "
-		$theirUsernames = ($theirEmails -creplace ' Delegate Email: ') -creplace '@sevone.com'
+		$theirUsernames = ($theirEmails -creplace ' Delegate Email: ') -creplace '@domain.com'
 		ForEach ($delegateUsername in $theirUsernames) {
 			$listbox_DelegatedTo.Items.Add($delegateUsername)
 			}
@@ -123,7 +123,7 @@ ForEach ($delegateToRemove in $delegatesToRemove) {
 	Write-Log "$loggedInUser removed the delegate $delegateToRemove from the service account: $serviceAccount"
 	}
 $theirEmails = GAM user $serviceAccount show delegates |Select-String " Delegate Email: "
-$theirUsernames = ($theirEmails -creplace ' Delegate Email: ') -creplace '@sevone.com'
+$theirUsernames = ($theirEmails -creplace ' Delegate Email: ') -creplace '@domain.com'
 $descr = "Delegated to: "
 ForEach ($username in $theirUsernames) {
 	$descr += $username

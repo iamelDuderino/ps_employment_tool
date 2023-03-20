@@ -56,7 +56,7 @@ $textbox_Username.Location = Set-Point 150 70
 $textbox_Username.MaxLength = 20
 $textbox_Username.Add_TextChanged({
 	If ($textbox_Username.Text -match '@') {
-		Throw-Error "Please enter the username without @sevone.com"
+		Throw-Error "Please enter the username without @domain.com"
 		$textbox_Username.Text = ($textbox_Username.Text).Trim('@')
 		$textbox_Username.SelectionStart = $textbox_Username.TextLength
 		}
@@ -113,8 +113,8 @@ $button_OK.Add_Click({
 	$script:theLastName = $textbox_LastName.Text
 	$script:theDisplayName = "$theFirstName $theLastName"
 	$script:theUser = $textbox_Username.Text
-	$script:theEmail = "$theUser@sevone.com"
-	$script:theDelegates = ($textbox_Delegates.Text).Split(",") -creplace '\s' | % { $_ -creplace '@sevone.com' }
+	$script:theEmail = "$theUser@domain.com"
+	$script:theDelegates = ($textbox_Delegates.Text).Split(",") -creplace '\s' | % { $_ -creplace '@domain.com' }
 	})
 	$form_GoogleSVC.Controls.Add($button_OK)
 	$form_GoogleSVC.AcceptButton = $button_OK
@@ -162,7 +162,7 @@ $form_GSync.Show()
 
 $theGeneratedPW = New-RandomPassword -Length 20 -Uppercase -Lowercase -Symbols -Numbers
 $thePassword = ConvertTo-SecureString $theGeneratedPW -AsPlainText -Force
-$theOU = "OU=Google SVC Accounts,DC=sevone,DC=com"
+$theOU = "OU=Google SVC Accounts,DC=domain,DC=com"
 $theGoogleOU = "/003 - Google SVC Accounts"
 $theUserProperties = @{
 	'SamAccountName' = "$theUser"
@@ -235,13 +235,13 @@ Regards,
 ForEach ($theDelegate in $theDelegates) {
 	GAM user $theUser delegate to $theDelegate
 	Write-Log "$loggedInUser delegated $theUser to $theDelegate"
-	Send-MailMessage -From "SevOne Admin <sevoneadmin@sevone.com>" -To "$theDelegate@sevone.com" -Subject "[SVC Account] You've Been Added As A Delegate!" -Body $mailBody -SMTPServer 'aspmx.l.google.com' -Port 25
+	Send-MailMessage -From "domain Admin <domainadmin@domain.com>" -To "$theDelegate@domain.com" -Subject "[SVC Account] You've Been Added As A Delegate!" -Body $mailBody -SMTPServer 'aspmx.l.google.com' -Port 25
 	}
 
 $label_GSync.Text = "Account delegated!"
 $form_GSync.Refresh()
 
-$theDelegatesList = gam user $theUser show delegates |Select-String " Delegate Email" | % { $_ -creplace '.*\s' } | % { $_ -creplace '@sevone.com' }
+$theDelegatesList = gam user $theUser show delegates |Select-String " Delegate Email" | % { $_ -creplace '.*\s' } | % { $_ -creplace '@domain.com' }
 $n = 0
 If ($theDelegatesList.Count -eq '1') {
 	$theDescr = "Delegated to: $theDelegatesList"

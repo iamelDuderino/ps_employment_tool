@@ -5,7 +5,7 @@
 
 Function GoogleSVC {
 
-$ADList = Get-ADUser -Filter * -SearchBase "OU=Google SVC Accounts,DC=sevone,DC=com"
+$ADList = Get-ADUser -Filter * -SearchBase "OU=Google SVC Accounts,DC=domain,DC=com"
 
 $form_GoogleSVC = New-Form
 $form_GoogleSVC.Size = Set-Size 380 120
@@ -32,7 +32,7 @@ $textbox_Username.Location = Set-Point 160 10
 $textbox_Username.Add_TextChanged({
 	$script:theUser = $textbox_Username.Text
 	If ($textbox_Username.Text -match '@') {
-		Throw-Error "Please enter the username without @sevone.com"
+		Throw-Error "Please enter the username without @domain.com"
 		$textbox_Username.Text = ($textbox_Username.Text).Trim('@')
 		$textbox_Username.SelectionStart = $textbox_Username.TextLength
 		}

@@ -31,7 +31,7 @@ If ($textbox_Username.Text -eq "") {
 	$script:svcCheck = $False
 	Check-Fill
 	} Else {
-	$username = ($textbox_Username.Text).Replace("@sevone.com","")
+	$username = ($textbox_Username.Text).Replace("@domain.com","")
 	$check = $googleSVCList |Select-String "^$username\b$" -Quiet
 	If ($check -eq $True) {
 		$label_Username.Forecolor = "Green"
@@ -63,7 +63,7 @@ If ($richtextbox_DelegateTo.Text -eq "") {
 	} Else {
 	If ($richtextbox_DelegateTo.Text -match ',') {
 		# Start of multiple user split
-		$userList2 = ($richtextbox_DelegateTo.Text).Replace("@sevone.com","")
+		$userList2 = ($richtextbox_DelegateTo.Text).Replace("@domain.com","")
 		$usersToAdd = $userList2.Split(",") -creplace "\s"
 		ForEach ($user in $usersToAdd) {
 			$check = $userList |Select-String "^$user\b$" -Quiet
@@ -79,7 +79,7 @@ If ($richtextbox_DelegateTo.Text -eq "") {
 			}
 		# End of multiple user split
 		} Else {
-			$user = ($richtextbox_DelegateTo.Text).Replace("@sevone.com","")
+			$user = ($richtextbox_DelegateTo.Text).Replace("@domain.com","")
 			$check = $userList |Select-String "^$user\b$" -Quiet
 			If ($check -eq $True) {
 				$label_DelegateTo.Forecolor = "Green"
@@ -96,7 +96,7 @@ If ($richtextbox_DelegateTo.Text -eq "") {
 	$form_GetDelegates.Controls.Add($richtextbox_DelegateTo)
 	
 $label_Commas = New-Label
-$label_Commas.Text = "* separate multiple users with a comma`n** can enter with or without @sevone.com"
+$label_Commas.Text = "* separate multiple users with a comma`n** can enter with or without @domain.com"
 $label_Commas.Font = "Arial,8,style=italic"
 $label_Commas.Forecolor = "Red"
 $label_Commas.Size = Set-Size 240 40
@@ -128,8 +128,8 @@ If ($fr -eq "Cancel") {
 	}
 	
 If ($fr -eq "OK") { 
-	$serviceAccount = ($textbox_Username.Text).Replace("@sevone.com","")
-	$delegateAdditions = (($richtextbox_DelegateTo.Text).Split(",")).Replace("@sevone.com","")
+	$serviceAccount = ($textbox_Username.Text).Replace("@domain.com","")
+	$delegateAdditions = (($richtextbox_DelegateTo.Text).Split(",")).Replace("@domain.com","")
 	$form_GetDelegates.Dispose()
 	AddDelegateAction
 	}
@@ -144,7 +144,7 @@ ForEach ($delegate in $delegateAdditions) {
 	Write-Log "$loggedInUser added $delegate as a delegate to the service account: $serviceAccount"
 	}
 $theirEmails = GAM user $serviceAccount show delegates |Select-String " Delegate Email: "
-$theirUsernames = ($theirEmails -creplace ' Delegate Email: ') -creplace '@sevone.com'
+$theirUsernames = ($theirEmails -creplace ' Delegate Email: ') -creplace '@domain.com'
 $descr = "Delegated to: "
 ForEach ($username in $theirUsernames) {
 	$descr += $username
@@ -165,7 +165,7 @@ If ($svcCheck -eq $True -AND $delegateCheck -eq $True) {
 		}
 }
 
-$googleSVCList = (Get-ADUser -Filter * |Where {$_.DistinguishedName -notmatch "CN=Users,DC=sevone,DC=com"}).SamAccountName
-$userList = (Get-ADUser -Filter * -SearchBase "CN=Users,DC=sevone,DC=com").SamAccountName
+$googleSVCList = (Get-ADUser -Filter * |Where {$_.DistinguishedName -notmatch "CN=Users,DC=domain,DC=com"}).SamAccountName
+$userList = (Get-ADUser -Filter * -SearchBase "CN=Users,DC=domain,DC=com").SamAccountName
 
 AddDelegateForm

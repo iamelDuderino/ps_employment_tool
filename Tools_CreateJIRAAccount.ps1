@@ -1,7 +1,7 @@
 # Employment Tool v3.0
 # 	Tools - Create JIRA & JIRA-Test Account
 
-$adList = Get-ADUser -Filter * -SearchBase "CN=Users,DC=sevone,DC=com"
+$adList = Get-ADUser -Filter * -SearchBase "CN=Users,DC=domain,DC=com"
 
 	# Gather information for user to create WebEx account for
 
