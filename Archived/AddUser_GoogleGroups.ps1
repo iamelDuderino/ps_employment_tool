@@ -8,7 +8,7 @@ Set-Alias C:\GAM\gam.exe gam
 Function Start-Form {
 $form					= New-Object System.Windows.Forms.Form
 $form.Size				= New-Object System.Drawing.Size(375,210)
-$form.Icon				= New-Object System.Drawing.Icon("C:\Scripts\Images\SevOne\SevOneLogo1.ico")
+$form.Icon				= New-Object System.Drawing.Icon("C:\Scripts\Images\domain\domainLogo1.ico")
 $form.Text				= "  Employment Tool"
 $form.SizeGripStyle		= 'Hide'
 $form.StartPosition		= 'CenterScreen'
@@ -111,7 +111,7 @@ If ($checkGroups -eq $True) {
 		} Else {
 			gam update group $group add user $user
 		}
-	$script:updatedMembers	= gam info group $group |findstr " member: " |%{ $_.Replace(" member: ","")} | %{ $_ -creplace '@sevone.*'} |Out-String
+	$script:updatedMembers	= gam info group $group |findstr " member: " |%{ $_.Replace(" member: ","")} | %{ $_ -creplace '@domain.*'} |Out-String
 	}
 } Else { 
 		[System.Windows.Forms.MessageBox]::Show("The group you have entered was not found in the system. Please try again." , "Group Check" , "OK")
@@ -124,7 +124,7 @@ Function Show-Results {
 
 $results					= New-Object System.Windows.Forms.Form
 $results.Size				= New-Object System.Drawing.Size(280,300)
-$results.Icon				= New-Object System.Drawing.Icon("C:\Scripts\Images\SevOne\SevOneLogo1.ico")
+$results.Icon				= New-Object System.Drawing.Icon("C:\Scripts\Images\domain\domainLogo1.ico")
 $results.Text				= "  Employment Tool"
 $results.SizeGripStyle		= 'Hide'
 $results.StartPosition		= 'CenterScreen'

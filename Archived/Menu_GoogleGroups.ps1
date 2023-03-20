@@ -15,7 +15,7 @@ $form.TopMost			= $True
 $form.KeyPreview		= $True
 $form.MaximizeBox		= $False
 $form.MinimizeBox		= $False
-$form.Icon				= New-Object System.Drawing.Icon("C:\Scripts\Images\SevOne\SevOneLogo1.ico")
+$form.Icon				= New-Object System.Drawing.Icon("C:\Scripts\Images\domain\domainLogo1.ico")
 
 $label					= New-Object System.Windows.Forms.Label
 $label.Text				= "Choose A Category:"

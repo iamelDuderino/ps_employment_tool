@@ -1,7 +1,7 @@
 # Employment Tool v3.0
 # 	Main Menu
 #
-# This tool is meant to serve as a GUI integration for Active Directory & Google Environments for the SevOne Help Desk team.
+# This tool is meant to serve as a GUI integration for Active Directory & Google Environments for the domain Help Desk team.
 #
 # Google GAM maintained @ GitHub by jay0lee
 # 	https://github.com/jay0lee/GAM
@@ -215,7 +215,7 @@ Throw-Error "You are not authorized to use this application!"
 	# Function for below: Deny access if the user is in the RDP list but has yet to configure GADS (mandatory)
 	
 Function Deny-Access {
-Throw-Error "You have not set up your GADS profile!`n`nPlease review the format here:`n`nhttps://sites.google.com/a/sevone.com/internal-it/account-management/it-gads---profile-configuration"
+Throw-Error "You have not set up your GADS profile!`n`nPlease review the format here:`n`nhttps://sites.google.com/a/domain.com/internal-it/account-management/it-gads---profile-configuration"
 }
 
 	# Function for below: Deny access if the user is not in the Domain Admins group
@@ -227,7 +227,7 @@ Throw-Error "Your account is not in the Domain Admins group. The tool may malfun
 	# Pre-check
 
 $GADSCheck			= Test-Path "C:\GADS\Account-and-Profiles-Sync-$loggedInUser"
-$authList 			= Net LocalGroup "Remote Desktop Users" |Where { $_ -match "SEVONE" }
+$authList 			= Net LocalGroup "Remote Desktop Users" |Where { $_ -match "domain" }
 $domainAdminList	= Get-ADGroupMember "Domain Admins" | %{ Get-ADUser $_ |Select SamAccountName }
 $domainAdminCheck	= $domainAdminList |Select-String $loggedInUser -Quiet
 

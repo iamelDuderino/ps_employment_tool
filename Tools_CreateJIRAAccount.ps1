@@ -74,8 +74,8 @@ If ($fr -eq "OK") {
 Function CreateJIRAAccount {
 	# JIRA & JIRA-Test API
 
-$JIRAURI = "https://jira.sevone.com/rest/api/2/user/search?username=$theUser"
-$JIRATestURI = "https://jira-test.sevone.com/rest/api/2/user/search?username=$theUser"
+$JIRAURI = "https://jira.domain.com/rest/api/2/user/search?username=$theUser"
+$JIRATestURI = "https://jira-test.domain.com/rest/api/2/user/search?username=$theUser"
 $AuthKey = (3,4,2,3,56,34,254,222,1,1,2,23,42,54,33,233,1,34,2,7,6,5,35,43)
 $AuthPassword = Get-Content "C:\Scripts\Text Files\JIRA-SVCITAPIAdminCredentials.txt" |ConvertTo-SecureString -Key $AuthKey
 $AutoCreds = New-Object System.Management.Automation.PSCredential -ArgumentList "svcitapiadmin",$AuthPassword
@@ -89,12 +89,12 @@ $checkJIRATest = Invoke-RestMethod -URI $JIRATestURI -Headers @{"Authorization"=
 If (!$checkJIRA) {
 	$ProvisionJIRA = @{
 		"name" = "$theUser"
-		"password" = "Day1@SevOne!"
+		"password" = "Day1@domain!"
 		"displayName" = "$theDisplayName"
 		"emailAddress" = "$theEmail"
 	}
 	$JSON = $ProvisionJIRA |ConvertTo-JSON
-	$CreateURI = "https://jira.sevone.com/rest/api/2/user"
+	$CreateURI = "https://jira.domain.com/rest/api/2/user"
 	Invoke-RestMethod -URI $CreateURI -Headers @{"Authorization"=("Basic {0}" -f $Base64AuthInfo)} -ContentType "application/json" -Body $JSON -Method POST
 	$JIRAGroups = "engineering" , "fisheye"
 	$userToAdd = @{
@@ -102,10 +102,10 @@ If (!$checkJIRA) {
 	}
 	$JSON = $userToAdd |ConvertTo-JSON
 	ForEach ($JIRAGroup in $JIRAGroups) {
-		$JIRAGroupURI = "https://jira.sevone.com/rest/api/2/group/user?groupname=$JIRAGroup"
+		$JIRAGroupURI = "https://jira.domain.com/rest/api/2/group/user?groupname=$JIRAGroup"
 		Invoke-RestMethod -URI $JIRAGroupURI -Headers @{"Authorization"=("Basic {0}" -f $Base64AuthInfo)} -ContentType "application/json" -Body $JSON -Method POST
 	}
-	Throw-Error "User account setup. Default password is:`n`nDay1@SevOne!"
+	Throw-Error "User account setup. Default password is:`n`nDay1@domain!"
 } Else { Throw-Error "Existing user with username $($theUser) was found in JIRA system." }
 	
 	# JIRA-Test
@@ -117,7 +117,7 @@ If (!$checkJIRATest) {
 		"emailAddress" = "$theEmail"
 	}
 	$JSON = $ProvisionJIRA |ConvertTo-JSON
-	$CreateURI = "https://jira-test.sevone.com/rest/api/2/user"
+	$CreateURI = "https://jira-test.domain.com/rest/api/2/user"
 	Invoke-RestMethod -URI $CreateURI -Headers @{"Authorization"=("Basic {0}" -f $Base64AuthInfo)} -ContentType "application/json" -Body $JSON -Method POST
 	$JIRAGroups = "engineering" , "fisheye"
 	$userToAdd = @{
@@ -125,7 +125,7 @@ If (!$checkJIRATest) {
 	}
 	$JSON = $userToAdd |ConvertTo-JSON
 	ForEach ($JIRAGroup in $JIRAGroups) {
-		$JIRAGroupURI = "https://jira-test.sevone.com/rest/api/2/group/user?groupname=$JIRAGroup"
+		$JIRAGroupURI = "https://jira-test.domain.com/rest/api/2/group/user?groupname=$JIRAGroup"
 		Invoke-RestMethod -URI $JIRAGroupURI -Headers @{"Authorization"=("Basic {0}" -f $Base64AuthInfo)} -Method POST -ContentType "application/json" -Body $JSON
 		}
 	} Else { Throw-Error "Existing user with username $($theUser) was found in JIRA-Test system." }

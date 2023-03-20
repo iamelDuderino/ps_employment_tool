@@ -5,7 +5,7 @@
 
 Function Start-Form {
 
-$ADList = Get-ADUser -Filter * -SearchBase "CN=Users,DC=sevone,DC=com" |Select SamAccountName
+$ADList = Get-ADUser -Filter * -SearchBase "CN=Users,DC=domain,DC=com" |Select SamAccountName
 
 $form_StartForm = New-Form
 $form_StartForm.Text = "  Employment Tool - Changes"
@@ -290,7 +290,7 @@ Sleep 3
 				$script:theCurrentOfficeLoc = $theUserInformation.Office				
 				$script:theCurrentEmployeeType = $theUserInformation.Description -creplace '.-.*'
 				$script:theCurrentExpirationDate = $theUserInformation.AccountExpirationDate
-$theUsersGroups	= gam info user $theUser |findstr "@sevone.com>" | % { $_ -creplace '.*<' } | % { $_ -creplace '@sevone.com>' }
+$theUsersGroups	= gam info user $theUser |findstr "@domain.com>" | % { $_ -creplace '.*<' } | % { $_ -creplace '@domain.com>' }
 ForEach ($locGroup in $locGroupList.Name) {
 	$check = $theUsersGroups |Select-String $locGroup\b -Quiet
 	If ($check) {
@@ -498,7 +498,12 @@ $form_UpdateUser.Refresh()
 
 # Set new employee type, if new employee type
 If ($theCurrentEmployeeType -ne $theNewEmployeeType) {
-	If ($theNewEmployeeType -eq "Employee") {		$currentADGroups = Get-ADPrincipalGroupMembership "$theUser" |Select Name		If ($currentADGroups -notcontains "SevOne Staff") {Add-ADGroupMember "SevOne Staff" $theUser}		If ($currentADGroups -contains "Programista") {Remove-ADGroupMember "Programista" $theUser}		If ($currentADGroups -contains "Contractors") {Remove-ADGroupMember "Contractors" $theUser}		}
+	If ($theNewEmployeeType -eq "Employee") {
+		$currentADGroups = Get-ADPrincipalGroupMembership "$theUser" |Select Name
+		If ($currentADGroups -notcontains "domain Staff") {Add-ADGroupMember "domain Staff" $theUser}
+		If ($currentADGroups -contains "Programista") {Remove-ADGroupMember "Programista" $theUser}
+		If ($currentADGroups -contains "Contractors") {Remove-ADGroupMember "Contractors" $theUser}
+		}
 	If ($theNewEmployeeType -eq "Contractor" -OR $theNewEmployeeType -eq "Sub-Contractor") {
 		$currentADGroups = Get-ADPrincipalGroupMembership "$theUser" |Select Name
 		If ($currentADGroups -notcontains "Contractors") {Add-ADGroupMember "Contractors" $theUser}
@@ -506,7 +511,7 @@ If ($theCurrentEmployeeType -ne $theNewEmployeeType) {
 		}
 	If ($theNewEmployeeType -eq "Intern") {
 		$currentADGroups = Get-ADPrincipalGroupMembership "$theUSer" |Select Name
-		If ($currentADGroups -notcontains "SevOne Staff") {Add-ADGroupMember "SevOne Staff" $theUser}
+		If ($currentADGroups -notcontains "domain Staff") {Add-ADGroupMember "domain Staff" $theUser}
 		If ($currentADGroups -contains "Programista") {Remove-ADGroupMember "Programista" $theUser}
 		If ($currentADGroups -contains "Contractors") {Remove-ADGroupMember "Contractors" $theUser}
 		}
@@ -514,13 +519,13 @@ If ($theCurrentEmployeeType -ne $theNewEmployeeType) {
 		$currentADGroups = Get-ADPrincipalGroupMembership "$theUser" |Select Name
 		If ($currentADGroups -notcontains "Programista") {Add-ADGroupMember "Programista" $theUser}
 		If ($currentADGroups -contains "Contractors") {Remove-ADGroupMember "Contractors" $theUser}
-		If ($currentADGroups -contains "SevOne Staff") {Remove-ADGroupMember "SevOne Staff" $theUSer}
+		If ($currentADGroups -contains "domain Staff") {Remove-ADGroupMember "domain Staff" $theUSer}
 		}
 	If ($theNewEmployeeType -eq "Jeavio") {
 		$currentADGroups = Get-ADPrincipalGroupMembership "$theUser" |Select Name
 		If ($theCurrentADGroups -notcontains "Jeavio") {Add-ADGroupMember "Jeavio" $theUser}
 		If ($theCurrentADGroups -contains "Contractors") {Remove-ADGroupMember "Contractors" $theUser}
-		If ($theCurrentADGroups -contains "SevOne Staff") {Remove-ADGroupMember "SevOne Staff" $theUser} 
+		If ($theCurrentADGroups -contains "domain Staff") {Remove-ADGroupMember "domain Staff" $theUser} 
 		}
 	$date = Get-Date
 	Echo "$date :: $loggedInUser modified $theUser's employee type to $theNewEmployeeType"
@@ -545,12 +550,12 @@ If ($theCurrentManagerStatus -ne $theNewManagerStatus) {
 	If ($theNewManagerStatus -eq $False) {
 		gam update group managers remove user $theUser
 		$date = Get-Date
-		Echo "$date :: $loggedInUser modified $theUser's manager status to False and removed from group managers@sevone.com" >> $logFile
+		Echo "$date :: $loggedInUser modified $theUser's manager status to False and removed from group managers@domain.com" >> $logFile
 		}
 	If ($theNewManagerStatus -eq $True) {
 		gam update group managers add user $theUser
 		$date = Get-Date
-		Echo "$date :: $loggedInUser modified $theUser's manager status to True and added to group managers@sevone.com" >> $logFile
+		Echo "$date :: $loggedInUser modified $theUser's manager status to True and added to group managers@domain.com" >> $logFile
 		}
 	}
 $label_Status.Text = "Manager status checked/updated..."

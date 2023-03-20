@@ -288,7 +288,7 @@ $button_OK.Add_Click({
     $script:theFirstName = $textBox_FirstName.Text
     $script:theLastName = $textBox_LastName.Text
     $script:theDisplayName = "$($textBox_LastName.Text), $($textBox_FirstName.Text)"
-    $script:theEmail = "$theUser@sevone.com"
+    $script:theEmail = "$theUser@domain.com"
 	$script:theManager = $textbox_Manager.Text
     $script:theTitle = $textBox_Title.Text
     $script:theDept = $comboBox_Dept.SelectedItem
@@ -467,8 +467,8 @@ If ($fr -eq "OK") { Begin-Provisioning }
 	# Begin provisioning
 
 Function Begin-Provisioning {
-$thePassword = (ConvertTo-SecureString -AsPlainText "Day1@SevOne!" -Force)
-$theOU = "CN=Users,DC=sevone,DC=com"
+$thePassword = (ConvertTo-SecureString -AsPlainText "Day1@domain!" -Force)
+$theOU = "CN=Users,DC=domain,DC=com"
 $theDescription = "$theEmployeeType - $theDept"
 
 	# Set up progress form
@@ -523,7 +523,7 @@ Set-ADAccountPassword $theUser -NewPassword $thePassword
 Set-ADUser $theUser -ChangePasswordAtLogon $False
 Set-ADUser $theUser -Enabled $True
 Set-ADUser $theUser -DisplayName "$theDisplayName"
-Set-ADUser $theUser -Company "SevOne, Inc."
+Set-ADUser $theUser -Company "domain, Inc."
 Set-ADUser $theUser -PasswordNeverExpires $True
 Set-ADUser $theUser -Department $theDept
 Set-ADUser $theUser -Title $theTitle
@@ -540,14 +540,14 @@ If ($theExpirationDate -ne "Never") {
 	$progression.Value = 30
 	$form_BeginProvisioning.Refresh()
 
-Add-ADGroupMember SevOne $theUser
+Add-ADGroupMember domain $theUser
 Add-ADGroupMember NonAdmins $theUser
 Add-ADGroupMember SSLVPN $theUser
 Add-ADGroupMember Wireless $theUser
 If ($theEmployeeType -match "Programista") {Add-ADGroupMember "Programista" $theUser}
 If ($theEmployeeType -match "Jeavio") {Add-ADGroupMember "Jeavio" $theUser}
 If ($theEmployeeType -match "Contractor" -OR $theEmployeeType -match "Sub-Contractor") {Add-ADGroupMember "Contractors" $theUser}
-If ($theEmployeeType -match "Employee" -OR $theEmployeeType -match "Intern") {Add-ADGroupMember "SevOne Staff" $theUser} # Dictates SevOne Source access
+If ($theEmployeeType -match "Employee" -OR $theEmployeeType -match "Intern") {Add-ADGroupMember "domain Staff" $theUser} # Dictates domain Source access
 
 	# Set Home Drive
 	
@@ -555,15 +555,15 @@ If ($theEmployeeType -match "Employee" -OR $theEmployeeType -match "Intern") {Ad
 	$progression.Value = 40
 	$form_BeginProvisioning.Refresh()
 
-$homeDriveCheck	= Test-Path "\\fileserver.sevone.com\File Server\home\$theUser"
+$homeDriveCheck	= Test-Path "\\fileserver.domain.com\File Server\home\$theUser"
 If (!$homeDriveCheck) {
-	New-Item -path "\\fileserver.sevone.com\File Server\home\$theUser" -type Directory
+	New-Item -path "\\fileserver.domain.com\File Server\home\$theUser" -type Directory
 	sleep 2
-	$ACL = Get-ACL "\\fileserver.sevone.com\File Server\home\$theUser"
+	$ACL = Get-ACL "\\fileserver.domain.com\File Server\home\$theUser"
 	$AR = New-Object system.security.accesscontrol.filesystemaccessrule("$theUser","FullControl","ContainerInherit,ObjectInherit","None","Allow")
 	$ACL.SetAccessRule($AR)
-	Set-ACL "\\fileserver.sevone.com\File Server\home\$theUser" $ACL
-	Set-ADUser $theUser -HomeDrive "Z:" -HomeDirectory "\\fileserver.sevone.com\File Server\home\$theUser"
+	Set-ACL "\\fileserver.domain.com\File Server\home\$theUser" $ACL
+	Set-ADUser $theUser -HomeDrive "Z:" -HomeDirectory "\\fileserver.domain.com\File Server\home\$theUser"
 	}
 
 	# Sync Google 50% mark
@@ -589,7 +589,7 @@ If ($theManagerStatus -eq "True") {GAM update group managers add user $theUser}
 	# WebEx API
 Function OldWebExAPI {
 If ($theWebExStatus -eq "True") {
-	$URI = 'https://sevone.webex.com/WBXService/XMLService'
+	$URI = 'https://domain.webex.com/WBXService/XMLService'
 	$ContentType = 'text/xml'
 	$Method = 'POST'
 	
@@ -614,8 +614,8 @@ If ($checkExistingResults -match "FAILURE") { # Proceed to provision because the
 	# JIRA & JIRA-Test API
 
 If ($theJIRAStatus -eq "True") {
-	$JIRAURI = "https://jira.sevone.com/rest/api/2/user/search?username=$theUser"
-	$JIRATestURI = "https://jira-test.sevone.com/rest/api/2/user/search?username=$theUser"
+	$JIRAURI = "https://jira.domain.com/rest/api/2/user/search?username=$theUser"
+	$JIRATestURI = "https://jira-test.domain.com/rest/api/2/user/search?username=$theUser"
 	$AuthKey = (3,4,2,3,56,34,254,222,1,1,2,23,42,54,33,233,1,34,2,7,6,5,35,43)
 	$AuthPassword = Get-Content "C:\Scripts\Text Files\JIRA-SVCITAPIAdminCredentials.txt" |ConvertTo-SecureString -Key $AuthKey
 	$AutoCreds = New-Object System.Management.Automation.PSCredential -ArgumentList "svcitapiadmin",$AuthPassword
@@ -630,12 +630,12 @@ If ($theJIRAStatus -eq "True") {
 	If (!$checkJIRA) {
 		$ProvisionJIRA = @{
 			"name" = "$theUser"
-			"password" = "Day1@SevOne!"
+			"password" = "Day1@domain!"
 			"displayName" = "$theDisplayName"
 			"emailAddress" = "$theEmail"
 		}
 		$JSON = $ProvisionJIRA |ConvertTo-JSON
-		$CreateURI = "https://jira.sevone.com/rest/api/2/user"
+		$CreateURI = "https://jira.domain.com/rest/api/2/user"
 		Invoke-RestMethod -URI $CreateURI -Headers @{"Authorization"=("Basic {0}" -f $Base64AuthInfo)} -ContentType "application/json" -Body $JSON -Method POST
 		$JIRAGroups = "engineering" , "fisheye"
 		$userToAdd = @{
@@ -643,7 +643,7 @@ If ($theJIRAStatus -eq "True") {
 		}
 		$JSON = $userToAdd |ConvertTo-JSON
 		ForEach ($JIRAGroup in $JIRAGroups) {
-			$JIRAGroupURI = "https://jira.sevone.com/rest/api/2/group/user?groupname=$JIRAGroup"
+			$JIRAGroupURI = "https://jira.domain.com/rest/api/2/group/user?groupname=$JIRAGroup"
 			Invoke-RestMethod -URI $JIRAGroupURI -Headers @{"Authorization"=("Basic {0}" -f $Base64AuthInfo)} -Method POST -ContentType "application/json" -Body $JSON
 		}
 	} Else { Throw-Error "Existing user with username $($theUser) was found in JIRA system." }
@@ -657,7 +657,7 @@ If ($theJIRAStatus -eq "True") {
 			"emailAddress" = "$theEmail"
 		}
 		$JSON = $ProvisionJIRA |ConvertTo-JSON
-		$CreateURI = "https://jira-test.sevone.com/rest/api/2/user"
+		$CreateURI = "https://jira-test.domain.com/rest/api/2/user"
 		Invoke-RestMethod -URI $CreateURI -Headers @{"Authorization"=("Basic {0}" -f $Base64AuthInfo)} -ContentType "application/json" -Body $JSON -Method POST
 		$JIRAGroups = "engineering" , "fisheye"
 		$userToAdd = @{
@@ -665,7 +665,7 @@ If ($theJIRAStatus -eq "True") {
 		}
 		$JSON = $userToAdd |ConvertTo-JSON
 		ForEach ($JIRAGroup in $JIRAGroups) {
-			$JIRAGroupURI = "https://jira-test.sevone.com/rest/api/2/group/user?groupname=$JIRAGroup"
+			$JIRAGroupURI = "https://jira-test.domain.com/rest/api/2/group/user?groupname=$JIRAGroup"
 			Invoke-RestMethod -URI $JIRAGroupURI -Headers @{"Authorization"=("Basic {0}" -f $Base64AuthInfo)} -Method POST -ContentType "application/json" -Body $JSON
 			}
 		} Else { Throw-Error "Existing user with username $($theUser) was found in JIRA-Test system." }

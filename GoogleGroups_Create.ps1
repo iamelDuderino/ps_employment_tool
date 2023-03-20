@@ -5,8 +5,8 @@
 
 Function Start-Form {
 
-$groupsList = GAM print groups |Select -Skip 1 | % { $_ -creplace '@sevone.com' }
-$usersList = GAM print users |Select -Skip 1 | % { $_ -creplace '@sevone.com' }
+$groupsList = GAM print groups |Select -Skip 1 | % { $_ -creplace '@domain.com' }
+$usersList = GAM print users |Select -Skip 1 | % { $_ -creplace '@domain.com' }
 $checkList = $groupsList + $usersList
 
 $form_StartForm = New-Form
@@ -201,7 +201,7 @@ $button_OK.Add_Click({
 				}
 	}
 	Sleep 2
-	$script:newGroupMembers = gam info group $groupShortName |findstr " member: " |%{ $_.Replace(" member: ","") } |%{ $_ -creplace '@sevone.*' }
+	$script:newGroupMembers = gam info group $groupShortName |findstr " member: " |%{ $_.Replace(" member: ","") } |%{ $_ -creplace '@domain.*' }
 	})
 	$form_AddMembers.Controls.Add($button_OK)
 	$form_AddMembers.AcceptButton = $button_OK

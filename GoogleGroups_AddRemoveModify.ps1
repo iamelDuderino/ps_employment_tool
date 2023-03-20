@@ -56,7 +56,7 @@ $queryBtn.Add_Click({
 		[System.Windows.Forms.MessageBox]::SHOW("DELT memberships must be approved by DELT members!" , "Warning" , "OK")
 		}
 	$progressBar1.Value	= 80
-	$members = $queriedGroup |findstr " member: " |%{ $_.Replace(" member: ","") } |%{ $_ -creplace '@sevone.*' }
+	$members = $queriedGroup |findstr " member: " |%{ $_.Replace(" member: ","") } |%{ $_ -creplace '@domain.*' }
 	ForEach ($member in $members) {
 		$queryResults.Items.Add($member)
 		}
@@ -217,7 +217,7 @@ $ok.Add_Click({
 			}
 		}
 	$queryResults.Items.Clear()
-	$members = gam info group $group |findstr " member: " |%{ $_.Replace(" member: ","") } |%{ $_ -creplace '@sevone.*' }
+	$members = gam info group $group |findstr " member: " |%{ $_.Replace(" member: ","") } |%{ $_ -creplace '@domain.*' }
 	ForEach ($member in $members) {
 		$queryResults.Items.Add($member)
 		}
@@ -244,7 +244,7 @@ ForEach ($user in $queryResults.SelectedItems) {
 	Echo "$date :: $loggedinUser removed the user $user from $group" >> $logFile
 	}
 $queryResults.Items.Clear()
-$members = gam info group $group |findstr " member: " |%{ $_.Replace(" member: ","") } |%{ $_ -creplace '@sevone.*' }
+$members = gam info group $group |findstr " member: " |%{ $_.Replace(" member: ","") } |%{ $_ -creplace '@domain.*' }
 ForEach ($member in $members) {
 	$queryResults.Items.Add($member)
 	}
