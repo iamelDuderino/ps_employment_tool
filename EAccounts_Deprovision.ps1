@@ -5,7 +5,7 @@
 
 Function Start-Form {
 
-$ADList = Get-ADUser -Filter * -SearchBase "CN=Users,DC=sevone,DC=com" |Select SamAccountName
+$ADList = Get-ADUser -Filter * -SearchBase "CN=Users,DC=domain,DC=com" |Select SamAccountName
 
 $form_DeProv = New-Form
 $form_DeProv.Size = Set-Size 480 200
@@ -200,7 +200,7 @@ gam print mobile query $theUser | %{ $_ -creplace ',.*' } |Select -Skip 1 |% { g
 	
 	# Remove All Google Groups
 
-GAM info user $theUser |Findstr "@sevone.com>" | % { $_ -creplace '^.*<' } | % { $_.Replace(">","") } | % { gam update group $_ remove user $theUser }
+GAM info user $theUser |Findstr "@domain.com>" | % { $_ -creplace '^.*<' } | % { $_.Replace(">","") } | % { gam update group $_ remove user $theUser }
 	$label_Progress.Text = "Google Groups Removed..."
 	$progressbar_Progress.Value = 40
 	$form_Progress.Refresh()
@@ -215,10 +215,10 @@ If ($shouldSetOOO -eq "Yes") {
 	# Set retention type
 
 If ($shouldRetain -eq "Yes") {
-	Get-ADUser $theUser |Move-ADObject -TargetPath "OU=Retained Accounts,DC=sevone,DC=com"
+	Get-ADUser $theUser |Move-ADObject -TargetPath "OU=Retained Accounts,DC=domain,DC=com"
 	GAM update user $theUser org "/002 - Retained Accounts"
 	} Else {
-	Get-ADUser $theUser |Move-ADObject -TargetPath "OU=Former Employees,DC=sevone,DC=com"
+	Get-ADUser $theUser |Move-ADObject -TargetPath "OU=Former Employees,DC=domain,DC=com"
 	GAM update user $theUser org "/001 - Former Employees"
 	Set-ADAccountExpiration $theUser -timespan 180.0:0
 	}
@@ -228,10 +228,10 @@ If ($shouldRetain -eq "Yes") {
 
 	# Home Drive Archive
 
-$fileToMove = "\\fileserver.sevone.com\File Server\home\$theUser"
-$homePath = "\\fileserver.sevone.com\File Server\home"
-$homeArchives = "\\fileserver.sevone.com\File Server\home\Former Employee Archives"
-$checkExisting = Get-ChildItem -path "\\fileserver.sevone.com\File Server\home\Former Employee Archives" |select-string $theUser\b -Quiet
+$fileToMove = "\\fileserver.domain.com\File Server\home\$theUser"
+$homePath = "\\fileserver.domain.com\File Server\home"
+$homeArchives = "\\fileserver.domain.com\File Server\home\Former Employee Archives"
+$checkExisting = Get-ChildItem -path "\\fileserver.domain.com\File Server\home\Former Employee Archives" |select-string $theUser\b -Quiet
 If (!$checkExisting){ # If Archives does not contain a dupe file of any kind, proceed to copy
 	move-item -path "$fileToMove" "$homeArchives"
 	}
@@ -241,11 +241,11 @@ If ($checkExisting) { # If Archives contains a file, but its not a dupe, ie. (1)
 		$lastFile = $checkFile.Name |findstr "(*)" |select -last 1
 		[int]$fileNum = $lastFile -creplace '[^0-9]'
 		$fileNum++
-		rename-item "$fileToMove" "\\fileserver.sevone.com\File Server\home\$theUser ($fileNum)"
-		Move-Item "\\fileserver.sevone.com\File Server\home\$theUser ($fileNum)" "$homeArchives"
+		rename-item "$fileToMove" "\\fileserver.domain.com\File Server\home\$theUser ($fileNum)"
+		Move-Item "\\fileserver.domain.com\File Server\home\$theUser ($fileNum)" "$homeArchives"
 		} ElseIf ($checkFile -notmatch "[0-9]") {
-			rename-item "$fileToMove" "\\fileserver.sevone.com\File Server\home\$theUser (1)"
-			move-item "\\fileserver.sevone.com\File Server\home\$theUser (1)" "$homeArchives"
+			rename-item "$fileToMove" "\\fileserver.domain.com\File Server\home\$theUser (1)"
+			move-item "\\fileserver.domain.com\File Server\home\$theUser (1)" "$homeArchives"
 			}
 	}
 	$label_Progress.Text = "File Server Home archived..."
@@ -268,8 +268,8 @@ $headers = @{
 	}
 $key = (3,4,2,3,56,34,254,222,1,1,2,23,42,54,33,233,1,34,2,7,6,5,35,43)
 $credPW = cat "C:\Scripts\Text Files\APIcreds.txt" |convertto-securestring -key $key
-$creds = New-Object -typename System.Management.Automation.PSCredential -argumentlist "sevoneadmin@sevone.com",$credPW
-$GetURI = "https://api.samanage.com/users.xml?email=$theUser@sevone.com"
+$creds = New-Object -typename System.Management.Automation.PSCredential -argumentlist "domainadmin@domain.com",$credPW
+$GetURI = "https://api.samanage.com/users.xml?email=$theUser@domain.com"
 	$label_Progress.Text = "Samanage disabled..."
 	$progressbar_Progress.Value = 70
 	$form_Progress.Refresh()
@@ -297,7 +297,7 @@ Invoke-RestMethod -Body $deprovXML -Credential $creds -Headers $headers -Method 
 
 	# WebEx API
 
-$XMLURI = "https://sevone.webex.com/WBXService/XMLService"
+$XMLURI = "https://domain.webex.com/WBXService/XMLService"
 $ContentType = 'text/xml'
 $Method = 'POST'
 $Body = (Get-Content "C:\Scripts\Text Files\GetWebExUser.xml").Replace("THE_USERNAME_TO_CHECK","$theUser")
@@ -320,8 +320,8 @@ $AutoCreds = New-Object System.Management.Automation.PSCredential -ArgumentList 
 $Creds = $AutoCreds.GetNetworkCredential()
 $Base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $Creds.Username,$Creds.Password)))
 
-$JIRAURI = "https://jira.sevone.com/rest/api/2/user?username=$theUser&expand=groups"
-$JIRATestURI = "https://jira-test.sevone.com/rest/api/2/user?username=$theUser&expand=groups"
+$JIRAURI = "https://jira.domain.com/rest/api/2/user?username=$theUser&expand=groups"
+$JIRATestURI = "https://jira-test.domain.com/rest/api/2/user?username=$theUser&expand=groups"
 
 $checkJIRA = Invoke-RestMethod -URI $JIRAURI -Headers @{"Authorization"=("Basic {0}" -f $Base64AuthInfo)} |ConvertTo-JSON
 $checkJIRATest = Invoke-RestMethod -URI $JIRATestURI -Headers @{"Authorization"=("Basic {0}" -f $Base64AuthInfo)} |ConvertTo-JSON
@@ -331,11 +331,11 @@ If ($checkJIRA) {
 		"name" = "$theUser"
 		}
 	$JSON = $userToJSON |ConvertTo-JSON
-	$AddURI = "https://jira.sevone.com/rest/api/2/group/user?groupname=inactive"
+	$AddURI = "https://jira.domain.com/rest/api/2/group/user?groupname=inactive"
 	Invoke-RestMethod -URI $AddURI -Body $JSON -Headers @{"Authorization"=("Basic {0}" -f $Base64AuthInfo)} -Method POST -ContentType "application/json"
 	$JIRAGroups = $checkJIRA |findstr "@{name=" | % { $_ -creplace '\s' } | % { $_ -creplace '.*groupname=' } | % { $_ -creplace '}"' } | % { $_ -creplace ','} | Where { $_ -ne "inactive" }
 	ForEach ($JIRAGroup in $JIRAGroups) {
-		$RemoveURI = "https://jira.sevone.com/rest/api/2/group/user?groupname=$JIRAGroup&username=$theUser"
+		$RemoveURI = "https://jira.domain.com/rest/api/2/group/user?groupname=$JIRAGroup&username=$theUser"
 		Invoke-RestMethod -URI $RemoveURI -Body $JSON -Headers @{"Authorization"=("Basic {0}" -f $Base64AuthInfo)} -Method DELETE -ContentType "application/json"
 		}
 	Throw-Error "$($theUser) had a JIRA account. Please de-activate."
@@ -346,11 +346,11 @@ If ($checkJIRATest) {
 		"name" = "$theUser"
 		}
 	$JSON = $userToJSON |ConvertTo-JSON
-	$AddURI = "https://jira-test.sevone.com/rest/api/2/group/user?groupname=inactive"
+	$AddURI = "https://jira-test.domain.com/rest/api/2/group/user?groupname=inactive"
 	Invoke-RestMethod -URI $AddURI -Body $JSON -Headers @{"Authorization"=("Basic {0}" -f $Base64AuthInfo)} -Method POST -ContentType "application/json"
 	$JIRATestGroups = $checkJIRATest |findstr "@{name=" | % { $_ -creplace '\s' } | % { $_ -creplace '.*groupname=' } | % { $_ -creplace '}"' } | % { $_ -creplace ','} | Where { $_ -ne "inactive" }
 	ForEach ($JIRATestGroup in $JIRATestGroups) {
-		$RemoveURI = "https://jira-test.sevone.com/rest/api/2/group/user?groupname=$JIRATestGroup&username=$theUser"
+		$RemoveURI = "https://jira-test.domain.com/rest/api/2/group/user?groupname=$JIRATestGroup&username=$theUser"
 		Invoke-RestMethod -URI $RemoveURI -Body $JSON -Headers @{"Authorization"=("Basic {0}" -f $Base64AuthInfo)} -Method DELETE -ContentType "application/json"
 		}
 	Throw-Error "$($theUser) had a JIRA-Test account. Please de-activate."
