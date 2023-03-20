@@ -27,8 +27,8 @@ $comboBox_Name = New-ComboBox
 $comboBox_Name.Size = Set-Size 240 20
 $comboBox_Name.Location = Set-Point 160 10
 $comboBox_Name.DropDownStyle = "DropDownList"
-$comboBox_Name_List1 = Get-ADUser -Filter * -SearchBase "OU=Former Employees,DC=sevone,DC=com" |Select SamAccountName |Sort SamAccountName
-$comboBox_Name_List2 = Get-ADUser -Filter * -SearchBase "OU=Retained Accounts,DC=sevone,DC=com" |Select SamAccountName |Sort SamAccountName
+$comboBox_Name_List1 = Get-ADUser -Filter * -SearchBase "OU=Former Employees,DC=domain,DC=com" |Select SamAccountName |Sort SamAccountName
+$comboBox_Name_List2 = Get-ADUser -Filter * -SearchBase "OU=Retained Accounts,DC=domain,DC=com" |Select SamAccountName |Sort SamAccountName
 $comboBox_Name_List = $comboBox_Name_List1  + $comboBox_Name_List2 |Sort SamAccountName
 $comboBox_Name.Add_SelectedIndexChanged({Check-Fill})
 ForEach ($user in $comboBox_Name_List) {
@@ -427,12 +427,12 @@ Set-ADUser $theUser -Enabled $True
 $label.Text = "Moving to Users OU..."
 $progression.Value = 10
 $form_BeginReProvisioning.Refresh()
-Get-ADUser $theUser |Move-ADObject -TargetPath "CN=Users,DC=sevone,DC=com"
-    # Set Day1@SevOne! password
+Get-ADUser $theUser |Move-ADObject -TargetPath "CN=Users,DC=domain,DC=com"
+    # Set Day1@domain! password
 $label.Text = "Setting password..."
 $progression.Value = 15
 $form_BeginReProvisioning.Refresh()
-$pw = "Day1@SevOne!"
+$pw = "Day1@domain!"
 $spw = ConvertTo-SecureString $pw -AsPlainText -Force
 Set-ADAccountPassword $theUser -NewPassword $spw
     # Remove/Set Expiration
@@ -474,44 +474,44 @@ $progression.Value = 43
 $form_BeginReProvisioning.Refresh()
 Set-ADUser $theUser -Manager $theManager
 	# Re-enable home drive archive
-$testTheArchive = Test-Path "\\fileserver.sevone.com\File Server\home\Former Employee Archives\$theUser"
-$testTheCurrent = Test-Path "\\fileserver.sevone.com\File Server\home\$theUser"
+$testTheArchive = Test-Path "\\fileserver.domain.com\File Server\home\Former Employee Archives\$theUser"
+$testTheCurrent = Test-Path "\\fileserver.domain.com\File Server\home\$theUser"
 $theUserInfo = Get-ADUser $theUser -Property *
 If ($testTheArchive -eq $True -AND $testTheCurrent -eq $False) {
 	$label.Text = "Unarchiving Home Folder..."
 	$progression.Value = 45
 	$form_BeginReProvisioning.Refresh()
-	Move-Item -Path "\\fileserver.sevone.com\File Server\home\Former Employee Archives\$theUser" "\\fileserver.sevone.com\File Server\home\"
+	Move-Item -Path "\\fileserver.domain.com\File Server\home\Former Employee Archives\$theUser" "\\fileserver.domain.com\File Server\home\"
 }
 If ($testTheArchive -eq $False -AND $testTheCurrent -eq $False) {
 	$label.Text = "Creating Home Folder..."
 	$progression.Value = 45
 	$form_BeginReProvisioning.Refresh()
-	New-Item -Path "\\fileserver.sevone.com\File Server\home\$theUser" -Type Directory
+	New-Item -Path "\\fileserver.domain.com\File Server\home\$theUser" -Type Directory
 }
 If ($testTheCurrent -eq $True) {
-	[System.Windows.Forms.MessageBox]::SHOW("This user has a home drive folder that was never archived or conflicts with another username:`n`n       \\fileserver.sevone.com\File Server\home\$theUser" , "Warning" , "OK" , "Warning")
+	[System.Windows.Forms.MessageBox]::SHOW("This user has a home drive folder that was never archived or conflicts with another username:`n`n       \\fileserver.domain.com\File Server\home\$theUser" , "Warning" , "OK" , "Warning")
 }
-If ($testTheCurrent -eq $False -AND $userInfo.HomeDirectory -ne "\\fileserver.sevone.com\File Server\home\$theUser") {
-	Set-ADUser $theUser -HomeDrive "Z:" -HomeDirectory "\\fileserver.sevone.com\File Server\home\$theUser"
-	$theHomeACL = Get-ACL "\\fileserver.sevone.com\File Server\home\$theUser"
+If ($testTheCurrent -eq $False -AND $userInfo.HomeDirectory -ne "\\fileserver.domain.com\File Server\home\$theUser") {
+	Set-ADUser $theUser -HomeDrive "Z:" -HomeDirectory "\\fileserver.domain.com\File Server\home\$theUser"
+	$theHomeACL = Get-ACL "\\fileserver.domain.com\File Server\home\$theUser"
 	$theNewAR = New-Object System.Security.AccessControl.FileSystemAccessRule("$theUser","FullControl","Allow")
 	$theHomeACL.SetAccessRule($theNewAR)
-	Set-ACL "\\fileserver.sevone.com\File Server\home\$theUser" $theHomeACL
+	Set-ACL "\\fileserver.domain.com\File Server\home\$theUser" $theHomeACL
 }
 	# Set standard AD groups
 $label.Text = "Modifying AD groups..."
 $progression.Value = 60
 $form_BeginReProvisioning.Refresh()
-Add-ADGroupMember "SevOne" $theUser
+Add-ADGroupMember "domain" $theUser
 Add-ADGroupMember "NonAdmins" $theUser
 Add-ADGroupMember "SSLVPN" $theUser
 Add-ADGroupMember "Wireless" $theUser
 Add-ADGroupMember "Domain Users" $theUser
 	# Set employment type specific groups
-If ($theEmployeeType -eq "Employee") {Add-ADGroupMember "SevOne Staff" $theUser} # This group enables access to SevOne Source for SevOne Full-Time Employees (FTEs)
-If ($theEmployeeType -eq "Programista") {Add-ADGroupMember "Programista" $theUser} # This group disables access to SevOne Source for all Programista contractors
-If ($theEmployeeType -eq "Jeavio") {Add-ADGroupMember "Jeavio" $theUser} # This group disables access to SevOne Source for all Jeavio contractors
+If ($theEmployeeType -eq "Employee") {Add-ADGroupMember "domain Staff" $theUser} # This group enables access to domain Source for domain Full-Time Employees (FTEs)
+If ($theEmployeeType -eq "Programista") {Add-ADGroupMember "Programista" $theUser} # This group disables access to domain Source for all Programista contractors
+If ($theEmployeeType -eq "Jeavio") {Add-ADGroupMember "Jeavio" $theUser} # This group disables access to domain Source for all Jeavio contractors
 If ($theEmployeeType -eq "Contractor" -OR $theEmployeeType -eq "Sub-Contractor") {Add-ADGroupMember "Contractors" $theUser} # Just a contractor group, nothing special
 	# Change primary group membership to Domain Users
 $theGroupToken = Get-ADGroup "Domain Users" -Properties @("primaryGroupToken")
@@ -549,8 +549,8 @@ $headers = @{
 }
 $key = (3,4,2,3,56,34,254,222,1,1,2,23,42,54,33,233,1,34,2,7,6,5,35,43)
 $credPW = cat "C:\Scripts\Text Files\APIcreds.txt" |convertto-securestring -key $key
-$creds = New-Object -typename System.Management.Automation.PSCredential -argumentlist "sevoneadmin@sevone.com",$credPW
-$GetURI = "https://api.samanage.com/users.xml?email=$theUser@sevone.com"
+$creds = New-Object -typename System.Management.Automation.PSCredential -argumentlist "domainadmin@domain.com",$credPW
+$GetURI = "https://api.samanage.com/users.xml?email=$theUser@domain.com"
 
 # GET the user - simply used to gather the userID for the PUT request
 [string]$XMLResults 	=(Invoke-WebRequest $GetURI -credential $creds -method get)
@@ -563,7 +563,7 @@ $PutURI = "https://api.samanage.com/users/$id.xml"
 [string]$reprovXML =
     "<user>
      <id>$id</id>
-     <name>$theUser@sevone.com</name>
+     <name>$theUser@domain.com</name>
      <disabled>false</disabled>
     </user>"
 
