@@ -10,7 +10,7 @@
 #	https://support.google.com/a/answer/106368?hl=en
 #
 # Employment Tool maintained @ IT-GADS by Me
-#	https://plus.google.com/+AJTomko
+#	https://plus.google.com/+Me
 
 Import-Module EmploymentTool_v3.0
 
