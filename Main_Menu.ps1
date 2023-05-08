@@ -9,7 +9,7 @@
 # Google GCDS (formerly known as GADS) maintained @ Google by Google
 #	https://support.google.com/a/answer/106368?hl=en
 #
-# Employment Tool maintained @ IT-GADS by AJ Tomko (until termination lulz!)
+# Employment Tool maintained @ IT-GADS by Me
 #	https://plus.google.com/+AJTomko
 
 Import-Module EmploymentTool_v3.0
